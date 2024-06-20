@@ -1,0 +1,34 @@
+from tool.base import tool
+from pydantic import BaseModel,Field
+from random import randint
+from os.path import join
+
+class Weather(BaseModel):
+    location:str=Field(...,description="The location for the weather.")
+
+@tool('Weather Tool',Weather)
+def weather_tool(location):
+    '''This Tool is used to give weather for a location.'''
+    return f"{location} is at {randint(20,40)} deg celsius"
+
+class Random(BaseModel):
+    pass
+
+@tool('Random Number Tool',Random)
+def random_gen_tool():
+    '''This Tool is used to generate random numbers only.'''
+    return f"Random Number: {randint(0,100)}"
+
+class Save(BaseModel):
+    file_path:str=Field(...,description='file path of the file.')
+    filename:str=Field(...,description='filename of the file.')
+    content:str=Field(...,description='the content that wanted to be saved.')
+
+@tool("Save Tool",args_schema=Save)
+def save_tool(file_path,filename,content):
+    '''This tool is used to save the contents to a file.
+    example: saver_tool('./foo/bar','abc.py','Hello World')
+    '''
+    with open(join(file_path,filename),'w') as f:
+        f.write(content)
+    return f"The content is saved to {filename} in {file_path} successfully."
