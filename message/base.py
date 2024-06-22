@@ -1,7 +1,7 @@
 from abc import ABC
 
 class BaseMessage(ABC):
-    def to_dict(self):
+    def to_dict(self)->dict[str,str]:
         return {
             'role':self.role,
             'content':self.content

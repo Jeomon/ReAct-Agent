@@ -1,6 +1,5 @@
 from agent.base import BaseAgent
 from inference.base import BaseInference
-from prompt.react_prompt import system_prompt,user_prompt
 from message.base import HumanMessage,AIMessage,SystemMessage
 from json import loads
 

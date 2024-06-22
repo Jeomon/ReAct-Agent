@@ -2,25 +2,25 @@ from inference.base import BaseInference
 from message.base import AIMessage
 from requests import post
 
-class ChatOllama(BaseInference):
-    def invoke(self,messages: list[dict])->AIMessage:
+class ChatGroq(BaseInference):
+    def invoke(self, messages: list[dict]):
+        self.headers.update({'Authorization': f'Bearer {self.api_key}'})
         headers=self.headers
         temperature=self.temperature
-        url=self.base_url or "http://localhost:11434/api/chat"
+        url=self.base_url or "https://api.groq.com/openai/v1/chat/completions"
         payload={
             "model": self.model,
             "messages": [message.to_dict() for message in messages],
-            "options":{
-                "temperature": temperature,
-            },
-            "format":"json",
-            "stream":False
+            "temperature": temperature,
+            "stream":False,
+            'response_format':{
+                "type": "json_object"
+            }
         }
         try:
             response=post(url=url,json=payload,headers=headers)
             response.raise_for_status()
             json_obj=response.json()
-            return AIMessage(json_obj['message']['content'])
+            return AIMessage(json_obj['choices'][0]['message']['content'])
         except Exception as err:
             print(err)
-    
