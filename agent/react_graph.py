@@ -6,6 +6,7 @@ from operator import add
 from json import loads
 
 class AgentState(TypedDict):
+    input:str
     messages:Annotated[list[BaseMessage],add]
 
 class ReActAgent(BaseAgent):
@@ -28,7 +29,8 @@ class ReActAgent(BaseAgent):
         return workflow.compile()
 
     def reason(self,state):
-        system_message=self.system_prompt.format(name=self.name,tools=self.tools_description,tool_names=self.tool_names)
+        question=state['input']
+        system_message=self.system_prompt.format(name=self.name,tools=self.tools_description,tool_names=self.tool_names,input=question)
         messages=[SystemMessage(system_message)]+state['messages']
         message=self.llm.invoke(messages)
         return {'messages':[message]}
@@ -36,6 +38,7 @@ class ReActAgent(BaseAgent):
     def decision(self,state):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
+        print(steps)
         if 'Final Answer' in steps:
             return True
         else:
@@ -44,6 +47,7 @@ class ReActAgent(BaseAgent):
     def action(self,state):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
+        # print(steps)
         action=steps['Action']
         if action['Action Name'] not in self.tool_names:
             raise ValueError("The tool is not found.")
@@ -55,6 +59,6 @@ class ReActAgent(BaseAgent):
         return {'messages':[message]}
         
     def invoke(self,input:str):
-        response=self.graph.invoke({'messages':[HumanMessage(input)]})
+        response=self.graph.invoke({'input':input})
         return response
 

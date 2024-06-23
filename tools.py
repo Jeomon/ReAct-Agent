@@ -25,10 +25,10 @@ class Save(BaseModel):
     content:str=Field(...,description='the content that wanted to be saved.')
 
 @tool("Save Tool",args_schema=Save)
-def save_tool(file_path,filename,content):
+def save_tool(file_path,filename,content)->str:
     '''This tool is used to save the contents to a file.
-    example: saver_tool('./foo/bar','abc.py','Hello World')
+    example: save_tool('./foo/bar/','abc.py','Hello World')
     '''
     with open(join(file_path,filename),'w') as f:
         f.write(content)
-    return f"The content is saved to {filename} in {file_path} successfully."
+    return f"Saved {filename} in {file_path} successfully."
