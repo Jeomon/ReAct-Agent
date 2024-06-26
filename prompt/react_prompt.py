@@ -26,7 +26,7 @@ NOTE: If the Action Input's value is a code block or snippet then follow below m
 2. Escape Quotes: ' should be \\' and " should be \".
 3. Escape Backslashes: \ should be \\.
 
-Caution: You can't use the tool and say the final answer in the same iteration.
+Caution: Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. Respond directly if appropriate.
 Begin!
 
 Question: {input}

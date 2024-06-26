@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph,END
 from typing import TypedDict,Annotated
 from agent.base import BaseAgent
-from message.base import BaseMessage,SystemMessage,HumanMessage
+from message.base import BaseMessage,SystemMessage,HumanMessage,AIMessage
 from operator import add
 from json import loads
 
@@ -10,14 +10,16 @@ class AgentState(TypedDict):
     messages:Annotated[list[BaseMessage],add]
 
 class ReActAgent(BaseAgent):
-    def __init__(self,name='',system_prompt='',tools=[],llm=None) -> None:
+    def __init__(self,name='',system_prompt='',tools=[],llm=None,max_iter=5) -> None:
         self.name=name
         self.system_prompt=system_prompt
         self.tools={tool.name:tool for tool in tools}
         self.tool_names=self.tools.keys()
-        self.tools_description=[f'Tool Name: {tool.name}\n Tool Args: {tool.schema}\n Tool Description: {tool.description}' for tool in tools]
+        self.tools_description=[f'Tool Name: {tool.name}\n Tool Input: {tool.schema}\n Tool Description: {tool.description}' for tool in tools]
         self.llm=llm
         self.graph=self.create_graph()
+        self.iter=0
+        self.max_iter=max_iter
     
     def create_graph(self):
         workflow=StateGraph(AgentState)
@@ -39,9 +41,12 @@ class ReActAgent(BaseAgent):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
         print(steps)
-        if 'Final Answer' in steps:
+        if 'Final Answer' in steps or self.iter==self.max_iter:
+            if self.iter==self.max_iter:
+                state['messages'].append(AIMessage("Iteration limit exceeded."))
             return True
         else:
+            self.iter+=1
             return False
         
     def action(self,state):
@@ -53,7 +58,7 @@ class ReActAgent(BaseAgent):
             raise ValueError("The tool is not found.")
         observation=self.tools[action['Action Name']](**action['Action Input'])
         content='''{{
-            "Observation": "{observation}"
+        "Observation": "{observation}"
         }}'''.format(observation=observation)
         message=HumanMessage(content)
         return {'messages':[message]}

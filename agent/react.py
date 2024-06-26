@@ -9,7 +9,7 @@ class ReActAgent(BaseAgent):
         self.system_prompt=system_prompt
         self.tools={tool.name:tool for tool in tools}
         self.tool_names=self.tools.keys()
-        self.tools_description=[f'Tool Name: {tool.name}\n Tool Args: {tool.schema}\n Tool Description: {tool.description}' for tool in tools]
+        self.tools_description=[f'Tool Name: {tool.name}\n Tool Input: {tool.schema}\n Tool Description: {tool.description}' for tool in tools]
         self.llm=llm
         self.messages=[]
         self.answer=''
@@ -63,3 +63,5 @@ class ReActAgent(BaseAgent):
             else:
                 return self.answer
             iter+=1
+        else:
+            self.messages.append(AIMessage("Iteration limit exceeded."))
