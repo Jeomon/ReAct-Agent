@@ -40,7 +40,6 @@ class ReActAgent(BaseAgent):
     def decision(self,state):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
-        print(steps)
         if 'Final Answer' in steps or self.iter==self.max_iter:
             if self.iter==self.max_iter:
                 state['messages'].append(AIMessage("Iteration limit exceeded."))
@@ -52,7 +51,6 @@ class ReActAgent(BaseAgent):
     def action(self,state):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
-        # print(steps)
         action=steps['Action']
         if action['Action Name'] not in self.tool_names:
             raise ValueError("The tool is not found.")
