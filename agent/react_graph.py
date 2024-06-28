@@ -8,7 +8,6 @@ from json import loads,dumps
 
 class AgentState(TypedDict):
     input:str
-    output:str
     messages:Annotated[list[BaseMessage],add]
 
 class ReActAgent(BaseAgent):
@@ -57,13 +56,12 @@ class ReActAgent(BaseAgent):
 
         if 'Final Answer' in steps:
             content=steps['Final Answer']
-            state['output']=content
             if self.verbose:
                 print(f"Final Answer: {content}")
             return True
         else:
             if self.verbose:
-                content=dumps(steps['Action'])
+                content=dumps(steps['Action'],indent=2)
                 print(f"Action: {content}")
             self.iter+=1
             return False
@@ -89,5 +87,7 @@ class ReActAgent(BaseAgent):
         
     def invoke(self,input:str,):
         response=self.graph.invoke({'input':input})
-        return response
+        last_message=response['messages'][-1]
+        final_answer=loads(last_message.content)['Final Answer']
+        return final_answer
 
