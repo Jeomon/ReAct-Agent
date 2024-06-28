@@ -1,4 +1,4 @@
-from agent.react_graph import ReActAgent
+from agent.react import ReActAgent
 from inference.groq import ChatGroq
 from tools import weather_tool,random_gen_tool,save_tool
 from os import environ
