@@ -16,9 +16,9 @@ Use the following format and provide the response in a valid JSON Format and not
         "Action Input": "the input parameters to the action. Example: {{ "parameter": "value"}}"
     }},
     "Observation": "Leave this blank for now; the result of the action will be filled later."
-    // ...this Thought/Action/Action Input/Observation can repeat N times.
-    "Thought": "I now know the final answer",
-    "Final Answer": "The final answer to the original input question, in sentence."
+    // ...this Thought/Action/Action Input/Observation can repeat N times. If Action Name is null then use the following.
+    "Thought": "I now know the final answer question (in a sentence).",
+    "Final Answer": "The final answer to the original input question (in a sentence)."
 }}
 
 NOTE: If the Action Input's value is a code block or snippet then follow below mentioned formatting to avoid parsing errors
@@ -26,7 +26,9 @@ NOTE: If the Action Input's value is a code block or snippet then follow below m
 2. Escape Quotes: ' should be \\' and " should be \".
 3. Escape Backslashes: \ should be \\.
 
-Caution: Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. Respond directly if appropriate.
+Caution: Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary.
+Respond directly if appropriate.
+
 Begin!
 
 Question: {input}
