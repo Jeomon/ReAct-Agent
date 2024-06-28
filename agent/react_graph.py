@@ -2,15 +2,17 @@ from langgraph.graph import StateGraph,END
 from typing import TypedDict,Annotated
 from agent.base import BaseAgent
 from message.base import BaseMessage,SystemMessage,HumanMessage,AIMessage
+from prompt.react_prompt import system_prompt
 from operator import add
-from json import loads
+from json import loads,dumps
 
 class AgentState(TypedDict):
     input:str
+    output:str
     messages:Annotated[list[BaseMessage],add]
 
 class ReActAgent(BaseAgent):
-    def __init__(self,name='',system_prompt='',tools=[],llm=None,max_iter=5) -> None:
+    def __init__(self,name='',tools=[],llm=None,max_iter=5,verbose=False) -> None:
         self.name=name
         self.system_prompt=system_prompt
         self.tools={tool.name:tool for tool in tools}
@@ -20,6 +22,7 @@ class ReActAgent(BaseAgent):
         self.graph=self.create_graph()
         self.iter=0
         self.max_iter=max_iter
+        self.verbose=verbose
     
     def create_graph(self):
         workflow=StateGraph(AgentState)
@@ -40,11 +43,28 @@ class ReActAgent(BaseAgent):
     def decision(self,state):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
-        if 'Final Answer' in steps or self.iter==self.max_iter:
-            if self.iter==self.max_iter:
-                state['messages'].append(AIMessage("Iteration limit exceeded."))
+
+        if self.verbose:
+            print(f'Thought: {steps['Thought']}')
+
+        if self.iter>self.max_iter:
+            content="Iteration limit exceeded."
+            state['output']=content
+            if self.verbose:
+                print(f"Final Answer: {content}")
+            state['messages'].append(AIMessage(content))
+            return True
+
+        if 'Final Answer' in steps:
+            content=steps['Final Answer']
+            state['output']=content
+            if self.verbose:
+                print(f"Final Answer: {content}")
             return True
         else:
+            if self.verbose:
+                content=dumps(steps['Action'])
+                print(f"Action: {content}")
             self.iter+=1
             return False
         
@@ -52,16 +72,22 @@ class ReActAgent(BaseAgent):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
         action=steps['Action']
+
         if action['Action Name'] not in self.tool_names:
             raise ValueError("The tool is not found.")
+        
         observation=self.tools[action['Action Name']](**action['Action Input'])
         content='''{{
         "Observation": "{observation}"
         }}'''.format(observation=observation)
+
+        if self.verbose:
+            print(f"Observation: {observation}")
+            
         message=HumanMessage(content)
         return {'messages':[message]}
         
-    def invoke(self,input:str):
+    def invoke(self,input:str,):
         response=self.graph.invoke({'input':input})
         return response
 

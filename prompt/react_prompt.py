@@ -12,7 +12,7 @@ Use the following format and provide the response in a valid JSON Format and not
     "Question": "The user question you must answer.",
     "Thought": "Understand the question and think about how to solve it.",
     "Action": {{
-        "Action Name": "the action to take, should be one of [{tool_names}]",
+        "Action Name": "the action to take, should be one of [{tool_names},null]. (null in json meaning no tool needed)",
         "Action Input": "the input parameters to the action. Example: {{ "parameter": "value"}}"
     }},
     "Observation": "Leave this blank for now; the result of the action will be filled later."
