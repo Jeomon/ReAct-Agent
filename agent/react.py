@@ -1,4 +1,4 @@
-from langgraph.graph import StateGraph,END
+from langgraph.graph import StateGraph
 from typing import TypedDict,Annotated
 from agent.base import BaseAgent
 from message.base import BaseMessage,SystemMessage,HumanMessage,AIMessage
@@ -8,6 +8,7 @@ from json import loads,dumps
 
 class AgentState(TypedDict):
     input:str
+    output:str
     messages:Annotated[list[BaseMessage],add]
 
 class ReActAgent(BaseAgent):
@@ -27,9 +28,11 @@ class ReActAgent(BaseAgent):
         workflow=StateGraph(AgentState)
         workflow.add_node('reason',self.reason)
         workflow.add_node('action',self.action)
+        workflow.add_node('final',self.final)
         workflow.set_entry_point('reason')
-        workflow.add_conditional_edges('reason',self.decision,{False:'action',True:END})
+        workflow.add_conditional_edges('reason',self.decision,{False:'action',True:'final'})
         workflow.add_edge('action','reason')
+        workflow.set_finish_point('final')
         return workflow.compile()
 
     def reason(self,state):
@@ -44,6 +47,7 @@ class ReActAgent(BaseAgent):
         steps=loads(last_message.content)
 
         if self.verbose:
+            print(f"Iteration: {self.iter}")
             print(f'Thought: {steps['Thought']}')
 
         if self.iter>self.max_iter:
@@ -84,10 +88,16 @@ class ReActAgent(BaseAgent):
             
         message=HumanMessage(content)
         return {'messages':[message]}
+    
+    def final(self,state):
+        last_message=state['messages'][-1]
+        output=loads(last_message.content)
+        return {**state,'output':output['Final Answer']}
         
     def invoke(self,input:str,):
         response=self.graph.invoke({'input':input})
-        last_message=response['messages'][-1]
-        final_answer=loads(last_message.content)['Final Answer']
-        return final_answer
-
+        return response
+    
+    def stream(self,input:str):
+        response=self.graph.stream({'input':input})
+        return response

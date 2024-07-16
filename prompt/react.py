@@ -28,7 +28,8 @@ NOTE: If the Action Input's value is a code block or snippet then follow below m
 3. Escape Backslashes: \ should be \\.
 
 Caution: Reminder to ALWAYS respond with a valid json blob containing only a single action.
-You cannot use the tool and provide the final answer in the same iteration.
+
+Instruction: In an iteration there can be only one thought, one action, one observation. In the final iteration there can be only one thought, one final answer.
 
 Begin!
 

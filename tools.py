@@ -2,6 +2,19 @@ from tool.base import tool
 from pydantic import BaseModel,Field
 from random import randint
 from os.path import join
+from subprocess import run
+
+class Terminal(BaseModel):
+    cmd:str=Field(...,description="The command to be executed.")
+
+@tool('Terminal Tool',Terminal)
+def terminal_tool(cmd):
+    '''This Tool is used to execute terminal commands.'''
+    process=run(cmd,text=True,shell=True,capture_output=True)
+    if process.returncode!=0:
+        return process.stderr.strip()
+    else:
+        return process.stdout.strip()
 
 class Weather(BaseModel):
     location:str=Field(...,description="The location for the weather.")
