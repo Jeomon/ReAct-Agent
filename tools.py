@@ -3,6 +3,7 @@ from pydantic import BaseModel,Field
 from random import randint
 from os.path import join
 from subprocess import run
+from duckduckgo_search import DDGS
 
 class Terminal(BaseModel):
     cmd:str=Field(...,description="The command to be executed.")
@@ -45,3 +46,25 @@ def save_tool(file_path,filename,content)->str:
     with open(join(file_path,filename),'w') as f:
         f.write(content)
     return f"Saved {filename} in {file_path} successfully."
+
+class Search(BaseModel):
+    query:str=Field(...,description="The query to be searched.")
+
+@tool("Search Tool",args_schema=Search)
+def search_tool(query:str):
+    """
+    Searches for news articles related to the given query using DDGS (DuckDuckGo Search) and returns the formatted results.
+
+    Args:
+        query (str): The query to search for.
+
+    Returns:
+        str: The formatted results of the search, including the title and body of each article.
+
+    Raises:
+        None
+    """
+    ddgs=DDGS()
+    results=ddgs.news(query,max_results=5)
+    formatted_results='\n'.join([f"title: {result.get('title','')}\\nbody: {result.get('body','')}" for result in results])
+    return f'Here are the results found: {formatted_results}'
