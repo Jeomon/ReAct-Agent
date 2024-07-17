@@ -74,11 +74,14 @@ class ReActAgent(BaseAgent):
         last_message=state['messages'][-1]
         steps=loads(last_message.content)
         action=steps['Action']
-
-        if action['Action Name'] not in self.tool_names:
-            raise ValueError("The tool is not found.")
         
-        observation=self.tools[action['Action Name']](**action['Action Input'])
+        if action['Action Name'] not in self.tool_names:
+            observation="I don't know it."
+        else:
+            try:
+                observation=self.tools[action['Action Name']](**action['Action Input'])
+            except Exception as e:
+                observation=f"Error: {e}"
         content='''{{
         "Observation": "{observation}"
         }}'''.format(observation=observation)
@@ -96,8 +99,8 @@ class ReActAgent(BaseAgent):
         
     def invoke(self,input:str,):
         response=self.graph.invoke({'input':input})
-        return response
+        return response['output']
     
     def stream(self,input:str):
-        response=self.graph.stream({'input':input})
-        return response
+        response=self.graph.invoke({'input':input})
+        return (chunk for chunk in response['output'])

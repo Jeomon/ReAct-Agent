@@ -9,6 +9,7 @@ api_key=environ.get('GROQ_API_KEY')
 
 llm=ChatGroq('llama3-8b-8192',api_key,temperature=0)
 input=input("Enter a query: ")
-agent=ReActAgent('Agent',[terminal_tool,save_tool,weather_tool],llm,verbose=False)
-response=agent.invoke(input)
-print(response['output'])
+agent=ReActAgent('Agent',[terminal_tool,save_tool,weather_tool],llm,verbose=True)
+response=agent.stream(input)
+for chunk in response:
+    print(chunk,flush=False,end='')
