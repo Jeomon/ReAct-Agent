@@ -7,22 +7,24 @@ If you got the final answer for the question in any stage then say it. You can a
 Following are the tools that are available in the Tool Box.
 {tools}
 
-Use the following json format and provide the response in a valid JSON Format and nothing else:
+Use the following json format and provide the response in a VALID JSON Format and nothing else:
 
 {{
     "Question": "The user question you must answer.",
-    "Thought": "Understand the question and think about how to solve it.",
+    "Thought": "Understand the question and use the observation if present based on these think about how to answer the question.",
     "Action": {{
-        "Action Name": "the action to take, should be from one in [{tool_names},null]. (null in json meaning no tool needed.)",
+        "Action Name": "pick the most appropriate tool from [{tool_names},null]. (null in json meaning no tool needed.)",
         "Action Input": "the input parameters to the action. Example: {{ "parameter": "value"}}"
     }},
-    "Observation": "Leave this blank for now; the result of the action will be filled later."
+    "Observation": "Leave this blank for now; the result of the action will be filled it can be a string or a valid json."
     // ...this Thought/Action/Action Input/Observation can repeat N times.
     "Thought": "I now know the final answer (define in a sentence).",
-    "Final Answer": "The final answer to the original input question (define in a sentence)."
+    "Final Answer": "The final answer to the original input question."
 }}
 
-Instruction: In an iteration there can be only one thought, one action, one observation. In the final iteration there can be only one thought, one final answer.
+Instruction: In an iteration there can be only one thought, one action, one observation. In the final iteration there should be one thought and one final answer.
+
+Instruction: The final answer property is the final answer to the original input question (explaination in detail) and should be in markdown format only.
 
 NOTE: If the Action Input's value is a code block or snippet then follow below mentioned formatting to avoid parsing errors
 1. Escape Newlines: \\n should be \\\n.

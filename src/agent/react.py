@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph
 from typing import TypedDict,Annotated
-from agent.base import BaseAgent
-from message.base import BaseMessage,SystemMessage,HumanMessage,AIMessage
-from prompt.react import system_prompt
+from src.agent.base import BaseAgent
+from src.message.base import BaseMessage,SystemMessage,HumanMessage,AIMessage
+from src.prompt.react import system_prompt
 from operator import add
 from json import loads,dumps
 
@@ -55,7 +55,6 @@ class ReActAgent(BaseAgent):
             state['output']=content
             if self.verbose:
                 print(f"Final Answer: {content}")
-            state['messages'].append(AIMessage(content))
             return True
 
         if 'Final Answer' in steps:
@@ -76,15 +75,18 @@ class ReActAgent(BaseAgent):
         action=steps['Action']
         
         if action['Action Name'] not in self.tool_names:
-            observation="I don't know it."
+            observation="Tool not found."
         else:
             try:
-                observation=self.tools[action['Action Name']](**action['Action Input'])
+                action_name=self.tools[action['Action Name']]
+                action_input=action['Action Input']
+                observation=action_name(**action_input)
+
             except Exception as e:
                 observation=f"Error: {e}"
-        content='''{{
-        "Observation": "{observation}"
-        }}'''.format(observation=observation)
+        content=f'''{{
+        "Observation": {observation}
+        }}'''
 
         if self.verbose:
             print(f"Observation: {observation}")
@@ -93,6 +95,8 @@ class ReActAgent(BaseAgent):
         return {'messages':[message]}
     
     def final(self,state):
+        if self.iter>self.max_iter:
+            state['messages'].append(AIMessage(dumps({'Final Answer': 'Iteration limit exceeded.'})))
         last_message=state['messages'][-1]
         output=loads(last_message.content)
         return {**state,'output':output['Final Answer']}
@@ -103,4 +107,5 @@ class ReActAgent(BaseAgent):
     
     def stream(self,input:str):
         response=self.graph.invoke({'input':input})
-        return (chunk for chunk in response['output'])
+        chunks=response['output']
+        return (chunk for chunk in chunks)

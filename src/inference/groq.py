@@ -1,5 +1,5 @@
-from inference.base import BaseInference
-from message.base import AIMessage
+from src.inference.base import BaseInference
+from src.message.base import AIMessage
 from requests import post
 
 class ChatGroq(BaseInference):
@@ -20,7 +20,7 @@ class ChatGroq(BaseInference):
         try:
             response=post(url=url,json=payload,headers=headers)
             json_obj=response.json()
-            # print(json_obj)
+            print(json_obj)
             return AIMessage(json_obj['choices'][0]['message']['content'])
         except Exception as err:
             print(err)

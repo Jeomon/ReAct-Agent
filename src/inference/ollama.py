@@ -1,5 +1,5 @@
-from inference.base import BaseInference
-from message.base import AIMessage
+from src.inference.base import BaseInference
+from src.message.base import AIMessage
 from requests import post
 from json import loads
 from typing import Literal

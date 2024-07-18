@@ -1,16 +1,17 @@
-from tool.base import tool
+from src.tool.base import tool
 from pydantic import BaseModel,Field
 from random import randint
 from os.path import join
 from subprocess import run
 from duckduckgo_search import DDGS
+from json import dumps
 
 class Terminal(BaseModel):
     cmd:str=Field(...,description="The command to be executed.")
 
 @tool('Terminal Tool',Terminal)
 def terminal_tool(cmd):
-    '''This Tool is used to execute terminal commands.'''
+    '''This Tool is used to execute shell commands only.'''
     process=run(cmd,text=True,shell=True,capture_output=True)
     if process.returncode!=0:
         return process.stderr.strip()
@@ -41,7 +42,6 @@ class Save(BaseModel):
 @tool("Save Tool",args_schema=Save)
 def save_tool(file_path,filename,content)->str:
     '''This tool is used to save the contents to a file.
-    example: save_tool('./foo/bar/','abc.py','Hello World')
     '''
     with open(join(file_path,filename),'w') as f:
         f.write(content)
@@ -52,19 +52,9 @@ class Search(BaseModel):
 
 @tool("Search Tool",args_schema=Search)
 def search_tool(query:str):
-    """
-    Searches for news articles related to the given query using DDGS (DuckDuckGo Search) and returns the formatted results.
-
-    Args:
-        query (str): The query to search for.
-
-    Returns:
-        str: The formatted results of the search, including the title and body of each article.
-
-    Raises:
-        None
-    """
+    '''
+    Searches for articles related to the given query using DDGS (DuckDuckGo Search) and returns the formatted results.
+    '''
     ddgs=DDGS()
-    results=ddgs.news(query,max_results=5)
-    formatted_results='\n'.join([f"title: {result.get('title','')}\\nbody: {result.get('body','')}" for result in results])
-    return f'Here are the results found: {formatted_results}'
+    results=ddgs.text(query,max_results=5)
+    return ','.join([f"{result.get('title','')}\\n{result.get('body','')}" for result in results])
