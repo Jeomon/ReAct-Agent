@@ -39,7 +39,7 @@ class ReActAgent(BaseAgent):
         question=state['input']
         system_message=self.system_prompt.format(name=self.name,tools=self.tools_description,tool_names=self.tool_names,input=question)
         messages=[SystemMessage(system_message)]+state['messages']
-        message=self.llm.invoke(messages)
+        message=self.llm.invoke(messages,json=True)
         return {'messages':[message]}
     
     def decision(self,state):

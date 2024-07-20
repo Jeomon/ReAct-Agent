@@ -43,8 +43,7 @@ class ChatOllama(BaseInference):
             response=post(url=url,json=payload,headers=headers,stream=True)
             response.raise_for_status()
             chunks=response.iter_lines(decode_unicode=True)
-            for chunk in chunks:
-                yield loads(chunk)
+            return (loads(chunk['message']['content']) for chunk in chunks)
         except Exception as err:
             print(err)
 
@@ -87,7 +86,6 @@ class Ollama(BaseInference):
             response=post(url=url,json=payload,headers=headers,stream=True)
             response.raise_for_status()
             chunks=response.iter_lines(decode_unicode=True)
-            for chunk in chunks:
-                yield loads(chunk)
+            return (loads(chunk['response']) for chunk in chunks)
         except Exception as err:
             print(err)
