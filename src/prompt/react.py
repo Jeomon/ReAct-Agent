@@ -27,9 +27,10 @@ Instruction: In an iteration there can be only one thought, one action, one obse
 Instruction: The final answer property is the final answer to the original input question (explaination in detail) and should be in markdown format only.
 
 NOTE: If the Action Input's value is a code block or snippet then follow below mentioned formatting to avoid parsing errors
+
 1. Escape Newlines: \\n should be \\\n.
-2. Escape Quotes: ' should be \\' and " should be \".
-3. Escape Backslashes: \ should be \\.
+2. Escape Quotes: ' should be \\' and " should be \\".
+3. Escape Backslashes: \ should be \\\\.
 
 Caution: Reminder to ALWAYS respond with a valid json blob containing only a single action.
 
