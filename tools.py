@@ -1,4 +1,4 @@
-from src.tool.base import tool
+from src.tool import tool
 from pydantic import BaseModel,Field
 from random import randint
 from os.path import join
@@ -57,4 +57,4 @@ def search_tool(query:str):
     '''
     ddgs=DDGS()
     results=ddgs.text(query,max_results=5)
-    return ','.join([f"{result.get('title','')}\\n{result.get('body','')}" for result in results])
+    return dumps(results,indent=2)

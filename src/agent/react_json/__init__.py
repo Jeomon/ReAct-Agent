@@ -1,10 +1,14 @@
 from langgraph.graph import StateGraph
 from typing import TypedDict,Annotated
-from src.agent.base import BaseAgent
-from src.message.base import BaseMessage,SystemMessage,HumanMessage,AIMessage
-from src.prompt.react import system_prompt
+from src.agent import BaseAgent
+from src.message import BaseMessage,SystemMessage,HumanMessage,AIMessage
+from src.agent.react_json.prompt import system_prompt
+from src.inference import BaseInference
 from operator import add
 from json import loads,dumps
+from platform import system
+from getpass import getuser
+from os import getcwd
 
 class AgentState(TypedDict):
     input:str
@@ -12,7 +16,7 @@ class AgentState(TypedDict):
     messages:Annotated[list[BaseMessage],add]
 
 class ReActAgent(BaseAgent):
-    def __init__(self,name='',tools=[],llm=None,max_iter=5,verbose=False) -> None:
+    def __init__(self,name:str='',tools=[],llm:BaseInference=None,max_iter:int=5,verbose:bool=False) -> None:
         self.name=name
         self.system_prompt=system_prompt
         self.tools={tool.name:tool for tool in tools}
@@ -36,11 +40,11 @@ class ReActAgent(BaseAgent):
         return workflow.compile()
 
     def reason(self,state):
-        question=state['input']
-        system_message=self.system_prompt.format(name=self.name,tools=self.tools_description,tool_names=self.tool_names,input=question)
-        messages=[SystemMessage(system_message)]+state['messages']
-        message=self.llm.invoke(messages,json=True)
-        return {'messages':[message]}
+        system_prompt=self.system_prompt.format(name=self.name,tools=self.tools_description,
+        tool_names=self.tool_names,os=system(),user=getuser(),cwd=getcwd(),input=state['input'])
+        messages=[SystemMessage(system_prompt)]+state['messages']
+        llm_response=self.llm.invoke(messages,json=True)
+        return {**state,'messages':[llm_response]}
     
     def decision(self,state):
         last_message=state['messages'][-1]
@@ -57,17 +61,17 @@ class ReActAgent(BaseAgent):
                 print(f"Final Answer: {content}")
             return True
 
-        if 'Final Answer' in steps:
-            content=steps['Final Answer']
-            if self.verbose:
-                print(f"Final Answer: {content}")
-            return True
-        else:
+        if 'Action' in steps:
             if self.verbose:
                 content=dumps(steps['Action'],indent=2)
                 print(f"Action: {content}")
             self.iter+=1
             return False
+        else:
+            content=steps['Final Answer']
+            if self.verbose:
+                print(f"Final Answer: {content}")
+            return True
         
     def action(self,state):
         last_message=state['messages'][-1]
@@ -85,14 +89,14 @@ class ReActAgent(BaseAgent):
             except Exception as e:
                 observation=f"Error: {e}"
         content=f'''{{
-        "Observation": {observation}
+        "Observation": {observation.strip()}
         }}'''
 
         if self.verbose:
             print(f"Observation: {observation}")
             
         message=HumanMessage(content)
-        return {'messages':[message]}
+        return {**state,'messages':[message]}
     
     def final(self,state):
         if self.iter>self.max_iter:

@@ -1,4 +1,5 @@
 from abc import ABC,abstractmethod
+from src.message import AIMessage
 
 class BaseInference(ABC):
     def __init__(self,model:str,api_key:str='',base_url:str='',temperature:float=0.5):
@@ -8,5 +9,5 @@ class BaseInference(ABC):
         self.temperature=temperature
         self.headers={'Content-Type': 'application/json'}
     @abstractmethod
-    def invoke(self,messages:list[dict]):
+    def invoke(self,messages:list[dict])->AIMessage:
         pass

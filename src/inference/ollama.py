@@ -1,11 +1,11 @@
-from src.inference.base import BaseInference
-from src.message.base import AIMessage
+from src.inference import BaseInference
+from src.message import AIMessage,BaseMessage
 from requests import post
 from json import loads
 from typing import Literal
 
 class ChatOllama(BaseInference):
-    def invoke(self,messages: list[dict],stream=False,format:Literal['','json']='')->AIMessage:
+    def invoke(self,messages: list[BaseMessage],stream=False,json=False)->AIMessage:
         headers=self.headers
         temperature=self.temperature
         url=self.base_url or "http://localhost:11434/api/chat"
@@ -15,7 +15,7 @@ class ChatOllama(BaseInference):
             "options":{
                 "temperature": temperature,
             },
-            "format":format,
+            "format":'json' if json else '',
             "stream":stream
         }
         try:
@@ -26,7 +26,7 @@ class ChatOllama(BaseInference):
         except Exception as err:
             print(err)
     
-    def stream(self,messages: list[dict],format:Literal['','json']=''):
+    def stream(self,messages: list[BaseMessage],json=False):
         headers=self.headers
         temperature=self.temperature
         url=self.base_url or "http://localhost:11434/api/chat"
@@ -36,19 +36,19 @@ class ChatOllama(BaseInference):
             "options":{
                 "temperature": temperature,
             },
-            "format":format,
+            "format":'json' if json else '',
             "stream":True
         }
         try:
             response=post(url=url,json=payload,headers=headers,stream=True)
             response.raise_for_status()
             chunks=response.iter_lines(decode_unicode=True)
-            return (loads(chunk['message']['content']) for chunk in chunks)
+            return (loads(chunk)['message']['content'] for chunk in chunks)
         except Exception as err:
             print(err)
 
 class Ollama(BaseInference):
-    def invoke(self, query:str,format:Literal['','json']='')->AIMessage:
+    def invoke(self, query:str,json=False)->AIMessage:
         headers=self.headers
         temperature=self.temperature
         url=self.base_url or "http://localhost:11434/api/generate"
@@ -58,7 +58,7 @@ class Ollama(BaseInference):
             "options":{
                 "temperature": temperature,
             },
-            "format":format,
+            "format":'json' if json else '',
             "stream":False
         }
         try:
@@ -69,7 +69,7 @@ class Ollama(BaseInference):
         except Exception as err:
             print(err)
 
-    def stream(self,query:str,format:Literal['','json']=''):
+    def stream(self,query:str,json=False):
         headers=self.headers
         temperature=self.temperature
         url=self.base_url or "http://localhost:11434/api/generate"
@@ -79,13 +79,13 @@ class Ollama(BaseInference):
             "options":{
                 "temperature": temperature,
             },
-            "format":format,
+            "format":'json' if json else '',
             "stream":True
         }
         try:
             response=post(url=url,json=payload,headers=headers,stream=True)
             response.raise_for_status()
             chunks=response.iter_lines(decode_unicode=True)
-            return (loads(chunk['response']) for chunk in chunks)
+            return (loads(chunk)['response'] for chunk in chunks)
         except Exception as err:
             print(err)
