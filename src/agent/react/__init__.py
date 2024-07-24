@@ -7,6 +7,9 @@ from src.utils import extract_steps
 from src.inference import BaseInference
 from operator import add
 from json import loads,dumps
+from getpass import getuser
+from os import getcwd
+from platform import system
 
 class AgentState(TypedDict):
     input:str

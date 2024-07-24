@@ -1,7 +1,5 @@
 import re
 import ast
-import json
-
 def extract_steps(input_string):
     # Regex patterns to capture the first occurrence of Thought, Action, and Action Input
     thought_pattern = r"Thought: ([^\n]+)"

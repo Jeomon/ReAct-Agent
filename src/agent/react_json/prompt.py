@@ -12,16 +12,20 @@ Use the following json format and provide the response in a VALID JSON Format an
 
 {{  //intermediate stages if you don't get the answer. You can use only one tool in each stage.
     "Question": "The user question you must answer.",
-    "Thought": "Understand the question and reason about how to answer the question.",
+    "Thought": "Understand and reason about the question also consider previous and subsequent steps.",
     "Action": {{
-        "Action Name": "pick a most appropriate tool from [{tool_names},null]", //null in json meaning no tool needed.
-        "Action Input": "the input parameters to the action. Example: {{ "parameter": "value"}}"
+        "Action Name": pick a most appropriate tool from [{tool_names},null], //null in json meaning no tool needed.
+        "Action Input": {{
+            "parameter1": "value1",
+            "parameter2": "value2",
+            ...
+        }}
     }},
     "Observation": "Leave this blank for now; the result of the action will be filled it can be a string or a valid json."
     // ...this Thought/Action/Action Input/Observation can repeat N times.
 
     //final stage if you got the answer.
-    "Thought": "I now know the final answer to tell the user.", //give it in a sentence.
+    "Thought": "I now know the final answer to tell the user.",
     "Final Answer": "The final answer to the original input question. In plain text."
 }}
 

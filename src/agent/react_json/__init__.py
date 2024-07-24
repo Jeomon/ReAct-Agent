@@ -78,6 +78,8 @@ class ReActAgent(BaseAgent):
         steps=loads(last_message.content)
         action=steps['Action']
         
+        if action['Action Name'] is None:
+            observation="No tool needed."
         if action['Action Name'] not in self.tool_names:
             observation="Tool not found."
         else:

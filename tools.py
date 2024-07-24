@@ -35,7 +35,7 @@ def random_gen_tool():
     return f"Random Number: {randint(0,100)}"
 
 class Save(BaseModel):
-    file_path:str=Field(...,description='file path of the file.')
+    file_path:str=Field(...,description='file path of the file without filename.')
     filename:str=Field(...,description='filename of the file.')
     content:str=Field(...,description='the content that wanted to be saved.')
 
@@ -57,4 +57,4 @@ def search_tool(query:str):
     '''
     ddgs=DDGS()
     results=ddgs.text(query,max_results=5)
-    return dumps(results,indent=2)
+    return '\n'.join([f"{result['title']}\n{result['body']}" for result in results])
