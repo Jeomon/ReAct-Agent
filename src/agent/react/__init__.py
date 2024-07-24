@@ -44,7 +44,8 @@ class ReActAgent(BaseAgent):
     def reason(self,state):
         messages='\n'.join([message.content for message in state['messages']])
         system_prompt=self.system_prompt.format(name=self.name,tools=self.tools_description,
-        tool_names=self.tool_names,input=state['input'],agent_scratchpad=messages)
+        tool_names=self.tool_names,input=state['input'],agent_scratchpad=messages,os=system(),
+        user=getuser(),cwd=getcwd())
         messages=[SystemMessage(system_prompt)]
         response_message=self.llm.invoke(messages)
         thought,action,action_input,final_answer=extract_steps(response_message.content)
