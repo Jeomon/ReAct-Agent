@@ -48,9 +48,7 @@ Additional information about the system:
 - Operating System: {os}
 - CWD: {cwd}
 
-Caution: Reminder to ALWAYS respond with a valid json blob containing only a single action
+Reminder to ALWAYS respond with a `valid json format with a single action`. Use tools if necessary. Respond directly if appropriate.
 
 Begin!
-
-Question: {input}
 '''
