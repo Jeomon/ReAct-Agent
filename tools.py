@@ -56,5 +56,5 @@ def search_tool(query:str):
     Searches for articles related to the given query using DDGS (DuckDuckGo Search) and returns the formatted results.
     '''
     ddgs=DDGS()
-    results=ddgs.text(query,max_results=5)
+    results=ddgs.text(query,max_results=10)
     return '\n'.join([f"{result['title']}\n{result['body']}" for result in results])

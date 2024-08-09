@@ -1,9 +1,11 @@
 from src.inference import BaseInference
 from src.message import AIMessage,HumanMessage,BaseMessage,SystemMessage
-from langgraph.graph import END,StateGraph
+from langchain_core.runnables.graph import MermaidDrawMethod
+from IPython.display import Image,display
+from langgraph.graph import StateGraph
 from src.agent import BaseAgent
-from src.tool import tool
 from typing import TypedDict,Annotated
+from colorama import Fore,init
 import json
 import operator
 
@@ -12,8 +14,10 @@ class AgentState(TypedDict):
     messages:Annotated[list[BaseMessage],operator.add]
     output:str
 
+init(autoreset=True)
+
 class Agent(BaseAgent):
-    def __init__(self,name:str='',description:str='',instructions:list[str]=[],tools:list[tool]=[],llm:BaseInference=None,verbose=False):
+    def __init__(self,name:str='',description:str='',instructions:list[str]=[],tools:list=[],llm:BaseInference=None,verbose=False):
         with open(r'src\agent\prompt.md','r') as f:
             self.system_prompt=f.read()
         self.tool_names=[tool.name for tool in tools]
@@ -27,25 +31,25 @@ class Agent(BaseAgent):
         message=self.llm.invoke(state['messages'],json=True)
         response=json.loads(message.content)
         if self.verbose:
-            print('Thought: '+response['Thought'])
+            print(f'{Fore.GREEN}Thought: {response['Thought']}')
         return {**state,'messages':[AIMessage(response)]}
-    
+
     def action(self,state:AgentState):
         message=(state['messages'].pop()).content
         action_name=self.tools[message['Action']['Action Name']]
         action_input=message['Action']['Action Input']
         if self.verbose:
-            print('Action: '+json.dumps(message['Action'],indent=2))
+            print(f'{Fore.CYAN}Action: {json.dumps(message['Action'],indent=2)}')
         observation=action_name(**action_input)
         message['Observation']=f'''{observation}'''
         if self.verbose:
-            print('Observation: '+observation)
+            print(f'{Fore.MAGENTA}Observation: {observation}')
         return {**state,'messages':[AIMessage(json.dumps(message,indent=2))]}
         
     def final(self,state:AgentState):
         message=(state['messages'][-1]).content
         if self.verbose:
-            print('Final Answer: '+message['Final Answer'])
+            print(f'{Fore.BLUE}Final Answer: {message['Final Answer']}')
         return {**state,'output':message['Final Answer']}
 
     def controller(self,state:AgentState):
@@ -67,6 +71,10 @@ class Agent(BaseAgent):
         workflow.set_finish_point('final')
 
         return workflow.compile(debug=False)
+    
+    def plot_mermaid(self):
+        plot=self.graph.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API)
+        return display(Image(plot))
 
     def invoke(self,input:str):
         system_prompt=self.system_prompt.format(tools=self.tools_description,tool_names=self.tool_names)
@@ -76,14 +84,6 @@ class Agent(BaseAgent):
             'output':'',
         }
         response=self.graph.invoke(state)
-        # for message in state['messages']:
-        #     if isinstance(message,SystemMessage):
-        #         print('system')
-        #     elif isinstance(message,HumanMessage):
-        #         print('human')
-        #     else:
-        #         print('ai')
-        # print(len(state['messages']))
         return response['output']
     
     def stream(self, input: str):
