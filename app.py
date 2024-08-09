@@ -7,10 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 api_key=environ.get('GROQ_API_KEY')
-
-# # llm=ChatOllama('llama3-groq-tool-use:latest ',temperature=0)
 llm=ChatGroq('llama-3.1-70b-versatile',api_key,temperature=0)
-# llm=ChatOllama('llama3.1:latest',temperature=0)
 input=input("Enter a query: ")
 agent=Agent('Agent',tools=[terminal_tool,weather_tool,search_tool,save_tool],llm=llm,verbose=True)
 response=agent.invoke(input)
