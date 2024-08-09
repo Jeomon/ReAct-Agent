@@ -1,7 +1,7 @@
 from src.inference import BaseInference
 from src.message import AIMessage,BaseMessage
+from half_json.core import JSONFixer
 from requests import post
-from json import loads
 
 class ChatGroq(BaseInference):
     def invoke(self, messages: list[BaseMessage],json:bool=False):
@@ -21,9 +21,8 @@ class ChatGroq(BaseInference):
             }
         try:
             response=post(url=url,json=payload,headers=headers)
-            json=response.json()
-            # print(json)
-            content=json['choices'][0]['message']['content']
+            json_object=response.json()
+            content=json_object['choices'][0]['message']['content']
             return AIMessage(content)
         except Exception as err:
             print(err)

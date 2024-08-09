@@ -5,7 +5,7 @@ class BaseMessage(ABC):
     def to_dict(self)->dict[str,str]:
         return {
             'role': self.role,
-            'content': self.content
+            'content': f'''{self.content}'''
         }
     def __repr__(self):
         class_name = self.__class__.__name__
