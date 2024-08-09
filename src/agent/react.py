@@ -81,7 +81,7 @@ class Agent(BaseAgent):
         parameters={
             'name':self.name,
             'description':self.description,
-            'instructions':self.instructions if self.instructions else 'Currently no new instructions available.',
+            'instructions':self.instructions,
             'tools':self.tools_description,
             'tool_names':self.tool_names
         }
