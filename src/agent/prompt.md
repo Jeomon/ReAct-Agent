@@ -22,7 +22,7 @@ If you need to use a tool to gather information or reach an answer, use the foll
     }},
     "Observation": "Result from the tool will be provided here."
 }}
-
+```
 - Wait for the user to provide the observation before proceeding to the next iteration. Do not move to the next step without the observation.
 
 **Option 2: Final Answer**
