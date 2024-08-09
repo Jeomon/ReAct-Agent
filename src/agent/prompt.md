@@ -40,7 +40,7 @@ Use **Option 2** when:
 ### Note for Action Input:
 If the `Action Input` requires a code block or snippet, follow these formatting rules to avoid parsing errors:
 
-1. Escape Newlines: `\n` should be `\\\n`.
+1. Escape Newlines: `\n` should be `\\n`.
 2. Escape Quotes: `'` should be `\'` and `"` should be `\"`.
 3. Escape Backslashes: `\` should be `\\`.
 
