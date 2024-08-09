@@ -1,4 +1,4 @@
-from src.agent.react import Agent
+from src.agent.json_react_agent.react import Agent
 from src.inference.groq import ChatGroq
 from src.inference.ollama import ChatOllama
 from tools import terminal_tool,save_tool,weather_tool,search_tool
