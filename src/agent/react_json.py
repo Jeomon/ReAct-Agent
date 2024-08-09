@@ -3,7 +3,6 @@ from src.message import AIMessage,HumanMessage,BaseMessage,SystemMessage
 from langchain_core.runnables.graph import MermaidDrawMethod
 from IPython.display import Image,display
 from langgraph.graph import StateGraph
-from src.utils import extract_llm_response
 from src.agent import BaseAgent
 from typing import TypedDict,Annotated
 from termcolor import colored
@@ -25,40 +24,34 @@ class Agent(BaseAgent):
         self.tools={tool.name:tool for tool in tools}
         self.llm=llm
         self.verbose=verbose
-        with open(r'src\agent\react_prompt.md','r') as f:
+        with open(r'src\agent\react_json_prompt.md','r') as f:
             self.system_prompt=f.read()
         self.graph=self.create_graph()
 
     def reason(self,state:AgentState):
-        message=self.llm.invoke(state['messages'])
-        response=extract_llm_response(message.content)
+        message=self.llm.invoke(state['messages'],json=True)
+        response=json.loads(message.content)
         if self.verbose:
             print(colored(f'Thought: {response['Thought']}',color='green',attrs=['bold']))
-        return {**state,'messages':[message]}
+        return {**state,'messages':[AIMessage(response)]}
 
     def action(self,state:AgentState):
         message=(state['messages'].pop()).content
-        response=extract_llm_response(message)
-        thought=response['Thought']
-        action_name=response['Action Name']
-        action_input=response['Action Input']
-        tool=self.tools[action_name]
+        action_name=self.tools[message['Action']['Action Name']]
+        action_input=message['Action']['Action Input']
         if self.verbose:
-            print(colored(f'Action Name: {action_name}',color='cyan',attrs=['bold']))
-            print(colored(f'Action Input: {json.dumps(action_input,indent=2)}',color='cyan',attrs=['bold']))
-        observation=tool(**action_input)
+            print(colored(f'Action: {json.dumps(message['Action'],indent=2)}',color='cyan',attrs=['bold']))
+        observation=action_name(**action_input)
+        message['Observation']=f'''{observation}'''
         if self.verbose:
             print(colored(f'Observation: {observation}',color='magenta',attrs=['bold']))
-        message=f'Thought:{thought}\nAction Name:{action_name}\nAction Input:{json.dumps(action_input,indent=2)}\nObservation:{observation}'
-        return {**state,'messages':[AIMessage(message)]}
+        return {**state,'messages':[AIMessage(json.dumps(message,indent=2))]}
         
     def final(self,state:AgentState):
         message=(state['messages'][-1]).content
-        response=extract_llm_response(message)
-        final_answer=response['Final Answer']
         if self.verbose:
-            print(colored(f'Final Answer: {final_answer}',color='blue',attrs=['bold']))
-        return {**state,'output':final_answer}
+            print(colored(f'Final Answer: {message['Final Answer']}',color='blue',attrs=['bold']))
+        return {**state,'output':message['Final Answer']}
 
     def controller(self,state:AgentState):
         message=(state['messages'][-1]).content
