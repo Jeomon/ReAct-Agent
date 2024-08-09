@@ -11,8 +11,7 @@ The following tools are at your disposal, each with a specific schema and descri
 
 {tools}
 
-### General Instructions:
-When faced with a question, follow these two options based on your reasoning:
+- **Important:** When faced with a question, follow these two options based on your reasoning:
 
 **Option 1: Using Tools**
 If you need to use a tool to gather information or reach an answer, use the following format:
@@ -29,7 +28,7 @@ If you need to use a tool to gather information or reach an answer, use the foll
     "Observation": "Result from the tool will be provided here."
 }}
 ```
-- Wait for the user to provide the observation before proceeding to the next iteration. Do not move to the next step without the observation.
+- **Important:** Wait for the user to provide the observation before proceeding to the next iteration. Do not move to the next step without the observation.
 
 **Option 2: Final Answer**
 Once you have gathered enough information or if you already know the answer, use this format:

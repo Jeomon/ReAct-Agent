@@ -12,5 +12,3 @@ input=input("Enter a query: ")
 agent=Agent('AI Agent','You are a helpful AI Assistant',[],tools=[terminal_tool,weather_tool,search_tool,save_tool],llm=llm,verbose=True)
 response=agent.invoke(input)
 print(response)
-# # for chunk in agent.stream(input):
-# #     print(chunk,flush=False,end='')
