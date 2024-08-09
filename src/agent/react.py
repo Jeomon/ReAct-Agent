@@ -16,14 +16,17 @@ class AgentState(TypedDict):
 
 class Agent(BaseAgent):
     def __init__(self,name:str='',description:str='',instructions:list[str]=[],tools:list=[],llm:BaseInference=None,verbose=False):
+        self.name=name
+        self.description=description
+        self.instructions='\n'.join([f'{i+1}. {instruction}' for i,instruction in enumerate(instructions)])
+        self.tool_names=[tool.name for tool in tools]
+        self.tools_description='['+'\n'.join([json.dumps({'Tool Name': tool.name,'Tool Input': tool.schema, 'Tool Description': tool.description},indent=2) for tool in tools])+']'
+        self.tools={tool.name:tool for tool in tools}
+        self.llm=llm
+        self.verbose=verbose
         with open(r'src\agent\prompt.md','r') as f:
             self.system_prompt=f.read()
-        self.tool_names=[tool.name for tool in tools]
-        self.tools={tool.name:tool for tool in tools}
-        self.tools_description='['+'\n'.join([json.dumps({'Tool Name': tool.name,'Tool Input': tool.schema, 'Tool Description': tool.description},indent=2) for tool in tools])+']'
-        self.llm=llm
         self.graph=self.create_graph()
-        self.verbose=verbose
 
     def reason(self,state:AgentState):
         message=self.llm.invoke(state['messages'],json=True)
@@ -75,7 +78,14 @@ class Agent(BaseAgent):
         return display(Image(plot))
 
     def invoke(self,input:str):
-        system_prompt=self.system_prompt.format(tools=self.tools_description,tool_names=self.tool_names)
+        parameters={
+            'name':self.name,
+            'description':self.description,
+            'instructions':self.instructions,
+            'tools':self.tools_description,
+            'tool_names':self.tool_names
+        }
+        system_prompt=self.system_prompt.format(**parameters)
         state={
             'input':input,
             'messages':[SystemMessage(system_prompt),HumanMessage(input)],
