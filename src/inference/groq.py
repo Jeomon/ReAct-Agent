@@ -22,6 +22,7 @@ class ChatGroq(BaseInference):
         try:
             response=post(url=url,json=payload,headers=headers)
             json_object=response.json()
+            # print(json_object)
             content=json_object['choices'][0]['message']['content']
             return AIMessage(content)
         except Exception as err:

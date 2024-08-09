@@ -5,7 +5,7 @@ from IPython.display import Image,display
 from langgraph.graph import StateGraph
 from src.agent import BaseAgent
 from typing import TypedDict,Annotated
-from colorama import Fore,init
+from termcolor import colored
 import json
 import operator
 
@@ -13,8 +13,6 @@ class AgentState(TypedDict):
     input:str
     messages:Annotated[list[BaseMessage],operator.add]
     output:str
-
-init(autoreset=True)
 
 class Agent(BaseAgent):
     def __init__(self,name:str='',description:str='',instructions:list[str]=[],tools:list=[],llm:BaseInference=None,verbose=False):
@@ -31,7 +29,7 @@ class Agent(BaseAgent):
         message=self.llm.invoke(state['messages'],json=True)
         response=json.loads(message.content)
         if self.verbose:
-            print(f'{Fore.GREEN}Thought: {response['Thought']}')
+            print(colored(f'Thought: {response['Thought']}',color='green',attrs=['bold']))
         return {**state,'messages':[AIMessage(response)]}
 
     def action(self,state:AgentState):
@@ -39,17 +37,17 @@ class Agent(BaseAgent):
         action_name=self.tools[message['Action']['Action Name']]
         action_input=message['Action']['Action Input']
         if self.verbose:
-            print(f'{Fore.CYAN}Action: {json.dumps(message['Action'],indent=2)}')
+            print(colored(f'Action: {json.dumps(message['Action'],indent=2)}',color='cyan',attrs=['bold']))
         observation=action_name(**action_input)
         message['Observation']=f'''{observation}'''
         if self.verbose:
-            print(f'{Fore.MAGENTA}Observation: {observation}')
+            print(colored(f'Observation: {observation}',color='magenta',attrs=['bold']))
         return {**state,'messages':[AIMessage(json.dumps(message,indent=2))]}
         
     def final(self,state:AgentState):
         message=(state['messages'][-1]).content
         if self.verbose:
-            print(f'{Fore.BLUE}Final Answer: {message['Final Answer']}')
+            print(colored(f'Final Answer: {message['Final Answer']}',color='blue',attrs=['bold']))
         return {**state,'output':message['Final Answer']}
 
     def controller(self,state:AgentState):
