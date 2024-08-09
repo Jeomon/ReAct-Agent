@@ -18,6 +18,10 @@ Run the app.py
 python app.py
 
 Enter the query: 'What is the weather in Kochi'
+The Weather in Kochi is 45deg C
+
+Enter the query: 'Tell me a joke'
+Why don't scientists trust atoms? Because they make up everything.
 ```
 
 ## Reference
